@@ -5,7 +5,8 @@
   "main": "backend/index.js",
   "scripts": {
     "dev": "node backend/index.js",
-    "start": "node backend/index.js"
+    "start": "node backend/index.js",
+    "build": "cd frontend && npm install && npm run build"
   },
   "keywords": [
     "transcribe",

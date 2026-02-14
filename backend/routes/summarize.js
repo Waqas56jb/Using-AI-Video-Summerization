@@ -7,7 +7,9 @@ const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
 
-const uploadsDir = path.join(__dirname, '..', 'uploads');
+const uploadsDir = process.env.VERCEL
+  ? path.join(require('os').tmpdir(), 'uploads')
+  : path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -27,16 +29,40 @@ const upload = multer({
   // No fileFilter — accept any extension; ffmpeg will fail if not a valid video
 });
 
+const AUDIO_EXT = new Set(['.mp3', '.m4a', '.wav', '.webm', '.ogg', '.opus', '.flac']);
+const isAudioFile = (file) => {
+  const ext = path.extname((file.originalname || '').toLowerCase());
+  const mime = (file.mimetype || '').toLowerCase();
+  return AUDIO_EXT.has(ext) || mime.startsWith('audio/');
+};
+
 router.post('/upload', upload.single('video'), async (req, res) => {
+  let tmpPath = null;
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No video file uploaded', code: 'MISSING_FILE' });
+      return res.status(400).json({ error: 'No file uploaded', code: 'MISSING_FILE' });
     }
-    const videoFilePath = req.file.path;
+    tmpPath = req.file.path;
     const fileName = req.file.originalname;
+
+    if (process.env.VERCEL) {
+      if (!isAudioFile(req.file)) {
+        return res.status(400).json({
+          error: 'On Vercel only audio files are supported (mp3, m4a, wav). Video needs the backend run locally.',
+          code: 'VIDEO_NOT_SUPPORTED'
+        });
+      }
+      const { transcribeAudioChunked } = require('../services/transcribe');
+      const { summarizeTranscriptMapReduce } = require('../services/summarize');
+      const transcript = await transcribeAudioChunked(tmpPath);
+      const summary = await summarizeTranscriptMapReduce(transcript);
+      res.json({ status: 'completed', transcript, summary, message: 'Done (Vercel).' });
+      return;
+    }
+
     const jobId = uuidv4();
     const jobData = {
-      videoFilePath,
+      videoFilePath: tmpPath,
       isUploadedFile: true,
       jobId,
       videoInfo: { title: fileName, duration: null }
@@ -50,8 +76,8 @@ router.post('/upload', upload.single('video'), async (req, res) => {
       videoInfo: { title: fileName, duration: null }
     });
   } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      try { fs.unlinkSync(req.file.path); } catch (_) {}
+    if (tmpPath && fs.existsSync(tmpPath)) {
+      try { fs.unlinkSync(tmpPath); } catch (_) {}
     }
     if (error.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ error: 'File too large. Maximum 500MB.', code: 'FILE_TOO_LARGE' });

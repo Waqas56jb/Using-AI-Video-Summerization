@@ -1,60 +1,39 @@
 # Lecture Transcribe & Summarize
 
-Upload an **English** lecture video → get **transcript** (Whisper) and **summary** (GPT). Runs locally only.
+Upload **video or audio** → get **transcript** (Whisper) and **summary** (GPT).  
+Deploy **backend** and **frontend** as two separate projects on Vercel.
 
-## Prerequisites
+---
 
-- **Node.js** v16+
-- **ffmpeg** (for extracting audio from video)
-- **OpenAI API key**
+## Deploy on Vercel (two projects)
 
-## Setup
+### Backend
 
-1. **Install ffmpeg** (if not installed):
-   - Windows: `choco install ffmpeg` or download from https://www.gyan.dev/ffmpeg/builds/ and add `bin` to PATH.
-   - Mac: `brew install ffmpeg`
+1. **New Project** on [Vercel](https://vercel.com) → Import your Git repo.
+2. **Root Directory:** set to **`backend`**.
+3. **Environment Variables:** add the same as in your `backend/.env`:
+   - `OPENAI_API_KEY` = your OpenAI API key
+4. Deploy. Copy the backend URL (e.g. `https://your-backend.vercel.app`).
 
-2. **Create `.env`** inside the **backend** folder (`backend/.env`):
-   ```env
-   OPENAI_API_KEY=sk-your-openai-api-key
-   PORT=5000
-   ```
+### Frontend
 
-3. **Install dependencies:**
-   ```bash
-   cd backend && npm install
-   cd ../frontend && npm install
-   ```
+1. **New Project** on Vercel → Import the same repo.
+2. **Root Directory:** set to **`frontend`**.
+3. **Environment Variables:** add:
+   - `REACT_APP_API_URL` = **your backend Vercel URL** (e.g. `https://your-backend.vercel.app`)
+4. Deploy. The frontend will call your deployed backend.
 
-## Run
+See **VERCEL_DEPLOY.md** for the full step-by-step.
 
-**Terminal 1 – Backend**
-```bash
-cd backend
-node index.js
-```
-Runs on http://localhost:5000
+**Backend on Vercel:** accepts **audio** (mp3, m4a, wav). For **video**, run the backend locally.
 
-**Terminal 2 – Frontend**
-```bash
-cd frontend
-npm start
-```
-Opens http://localhost:3000
+---
 
-Upload a video → wait for "Transcribe & Summarize" to finish → view transcript and summary.
+## Run locally
 
-## Optional
+1. **Backend:** create `backend/.env` with `OPENAI_API_KEY` and `PORT=5000`.  
+   Run: `cd backend && npm install && node index.js`
+2. **Frontend:** `cd frontend && npm install && npm start`  
+   Uses `http://localhost:5000` in development.
 
-- **Redis**: Not required. Without it, the app uses an in-memory queue (jobs are lost on server restart). To use Redis: install and run `redis-server`, then set in `.env`: `REDIS_HOST=localhost`, `REDIS_PORT=6379`.
-
-## Deploy to Vercel (serverless)
-
-1. Push the repo to GitHub and import the project in [Vercel](https://vercel.com).
-2. **Root directory**: leave as repo root. **Build**: uses `vercel.json` (builds `frontend`, serves `frontend/build`).
-3. **Environment variables**: In Vercel project settings, add `OPENAI_API_KEY` (your OpenAI key).
-4. Deploy. The app will be live at `https://your-project.vercel.app`.
-
-**Note:** On Vercel, only **audio** uploads are supported (mp3, m4a, wav, etc.) because there is no ffmpeg. For **video** uploads, run the backend locally or deploy it to Render and set `REACT_APP_API_URL` to that backend URL.
-
-See **PROJECT_STRUCTURE.md** for the full layout and local vs serverless behavior.
+For **video** uploads you need ffmpeg installed and the backend running locally.
