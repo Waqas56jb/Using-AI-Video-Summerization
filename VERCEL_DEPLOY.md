@@ -8,10 +8,11 @@ Deploy **backend** and **frontend** as two separate Vercel projects. Use **Root 
 
 1. In Vercel: **New Project** → Import the same Git repo.
 2. **Root Directory:** set to **`backend`** (only the backend folder).
-3. **Environment Variables** (same as your current `backend/.env`):
+3. **Output Directory:** In **Project Settings → General**, find **Output Directory**. Leave it **empty** (delete any value like `public`). The backend is API-only; no static output.
+4. **Environment Variables** (same as your current `backend/.env`):
    - `OPENAI_API_KEY` = your OpenAI API key
    - Optionally: `PORT`, `REDIS_HOST`, `REDIS_PORT` (not required on Vercel)
-4. Deploy. Copy the deployed URL, e.g. `https://your-backend.vercel.app`.
+5. Deploy. Copy the deployed URL, e.g. `https://your-backend.vercel.app`.
 
 **Note:** On Vercel the backend accepts **audio only** (mp3, m4a, wav). Video is supported when you run the backend locally.
 
