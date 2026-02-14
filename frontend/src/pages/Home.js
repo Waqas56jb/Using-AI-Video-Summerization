@@ -13,11 +13,13 @@ import { api } from '../services/api';
 function getErrorMessage(err) {
   const errorData = err.response?.data;
   const status = err.response?.status;
+  const isTimeout = err.code === 'ECONNABORTED' || (err.message && String(err.message).toLowerCase().includes('timeout'));
   let msg = errorData?.error || err.message || 'An error occurred';
-  if (errorData?.code === 'FILE_TOO_LARGE') msg = 'File too large. Maximum 500MB.';
+  if (errorData?.code === 'FILE_TOO_LARGE') msg = errorData?.error || 'File too large. Maximum 500MB.';
   else if (errorData?.code === 'MISSING_FILE') msg = 'Please select a video file.';
+  else if (errorData?.code === 'TRANSCRIPTION_ERROR') msg = errorData?.error || 'Transcription or summarization failed. Try a shorter file or check the API key.';
   else if (errorData?.code === 'VIDEO_NOT_SUPPORTED') msg = errorData?.error || 'On this deployment only audio files are supported (mp3, m4a, wav). For video, use a local backend or deploy to Render.';
-  else if (status === 504) msg = 'Request timed out. Try a shorter audio file (e.g. under 2–3 minutes).';
+  else if (status === 504 || isTimeout) msg = 'Request timed out. Try a shorter audio file (under 1–2 minutes on this server).';
   else if (!err.response) {
     msg = process.env.NODE_ENV === 'development'
       ? `Cannot reach the backend. Start it with: cd backend && node index.js (http://localhost:5000). ${err.message || 'Network error'}`

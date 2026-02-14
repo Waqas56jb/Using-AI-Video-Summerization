@@ -14,19 +14,22 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, `video-${uniqueSuffix}${ext}`);
-  }
-});
+// On Vercel use memoryStorage and write to /tmp in the route (more reliable in serverless)
+const storage = process.env.VERCEL
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: (req, file, cb) => cb(null, uploadsDir),
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, `video-${uniqueSuffix}${ext}`);
+      }
+    });
 
+const maxFileSize = process.env.VERCEL ? 25 * 1024 * 1024 : 500 * 1024 * 1024; // 25MB on Vercel to avoid timeout
 const upload = multer({
   storage,
-  limits: { fileSize: 500 * 1024 * 1024 }
-  // No fileFilter — accept any extension; ffmpeg will fail if not a valid video
+  limits: { fileSize: maxFileSize }
 });
 
 const AUDIO_EXT = new Set(['.mp3', '.m4a', '.wav', '.webm', '.ogg', '.opus', '.flac']);
@@ -42,7 +45,6 @@ router.post('/upload', upload.single('video'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded', code: 'MISSING_FILE' });
     }
-    tmpPath = req.file.path;
     const fileName = req.file.originalname;
 
     if (process.env.VERCEL) {
@@ -52,13 +54,29 @@ router.post('/upload', upload.single('video'), async (req, res) => {
           code: 'VIDEO_NOT_SUPPORTED'
         });
       }
+      // memoryStorage: write buffer to /tmp so transcribe can read the file
+      const ext = path.extname(fileName) || '.mp3';
+      tmpPath = path.join(uploadsDir, `audio-${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`);
+      fs.writeFileSync(tmpPath, req.file.buffer, { flag: 'w' });
       const { transcribeAudioChunked } = require('../services/transcribe');
       const { summarizeTranscriptMapReduce } = require('../services/summarize');
-      const transcript = await transcribeAudioChunked(tmpPath);
-      const summary = await summarizeTranscriptMapReduce(transcript);
+      let transcript;
+      let summary;
+      try {
+        transcript = await transcribeAudioChunked(tmpPath);
+        summary = await summarizeTranscriptMapReduce(transcript);
+      } catch (err) {
+        console.error('Vercel transcribe/summarize error:', err.message);
+        return res.status(500).json({
+          error: err.message || 'Transcription or summarization failed',
+          code: 'TRANSCRIPTION_ERROR'
+        });
+      }
       res.json({ status: 'completed', transcript, summary, message: 'Done (Vercel).' });
       return;
     }
+
+    tmpPath = req.file.path;
 
     const jobId = uuidv4();
     const jobData = {
@@ -80,7 +98,10 @@ router.post('/upload', upload.single('video'), async (req, res) => {
       try { fs.unlinkSync(tmpPath); } catch (_) {}
     }
     if (error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'File too large. Maximum 500MB.', code: 'FILE_TOO_LARGE' });
+      const msg = process.env.VERCEL
+        ? 'File too large. On this server use audio under 25MB (about 2–3 minutes).'
+        : 'File too large. Maximum 500MB.';
+      return res.status(400).json({ error: msg, code: 'FILE_TOO_LARGE' });
     }
     console.error('Error creating job:', error.message);
     res.status(500).json({ error: error.message, code: 'JOB_CREATION_ERROR' });
