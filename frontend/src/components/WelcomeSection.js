@@ -5,36 +5,27 @@ export function WelcomeSection({ apiStatus }) {
     <div className="welcome-section">
       <div className="welcome-card">
         {apiStatus === 'running' && (
-          <div className="api-status-banner">✅ All APIs are running</div>
-        )}
-        {apiStatus === 'health_only' && (
-          <div className="api-status-banner warning">
-            ⚠️ Backend is reachable but summarization is not available here. Set <strong>REACT_APP_API_URL</strong> to your <strong>Render</strong> backend URL (see DEPLOY_BACKEND_RENDER.md) and redeploy the frontend.
-          </div>
+          <div className="api-status-banner">✅ Backend is running</div>
         )}
         {apiStatus === 'error' && (
           <div className="api-status-banner error">
-            ⚠️ Cannot reach backend. Check REACT_APP_API_URL or ensure backend is deployed.
+            ⚠️ Cannot reach backend. Start it with: <code>cd backend && node index.js</code>
           </div>
         )}
         <h3>🚀 Get Started</h3>
-        <p>Enter a YouTube URL or upload a video file above and click "Summarize" to get started!</p>
+        <p>Upload your English lecture video above and click "Transcribe & Summarize" to get the transcript and summary.</p>
         <div className="features">
           <div className="feature">
-            <span className="feature-icon">⚡</span>
-            <span>Background Processing</span>
+            <span className="feature-icon">🎤</span>
+            <span>English transcription (Whisper)</span>
           </div>
           <div className="feature">
-            <span className="feature-icon">🎯</span>
-            <span>Accurate Summaries</span>
-          </div>
-          <div className="feature">
-            <span className="feature-icon">🔒</span>
-            <span>Secure & Private</span>
+            <span className="feature-icon">📝</span>
+            <span>AI summary</span>
           </div>
           <div className="feature">
             <span className="feature-icon">📁</span>
-            <span>Upload Your Videos</span>
+            <span>Upload your video</span>
           </div>
         </div>
       </div>

@@ -1,17 +1,18 @@
 {
-  "name": "youtube-video-summarizer",
+  "name": "lecture-transcribe-summarize",
   "version": "1.0.0",
-  "description": "YouTube Video Summarizer using Node.js and React",
+  "description": "Upload lecture video → transcribe (Whisper) and summarize (GPT)",
   "main": "backend/index.js",
   "scripts": {
     "dev": "node backend/index.js",
     "start": "node backend/index.js"
   },
   "keywords": [
-    "youtube",
-    "summarizer",
+    "transcribe",
+    "summarize",
     "openai",
-    "whisper"
+    "whisper",
+    "lecture"
   ],
   "author": "",
   "license": "ISC",
@@ -24,6 +25,7 @@
     "ioredis": "^5.9.3",
     "multer": "^2.0.2",
     "openai": "^6.21.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "formidable": "^3.5.2"
   }
 }

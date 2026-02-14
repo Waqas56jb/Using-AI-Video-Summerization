@@ -437,6 +437,48 @@
   font-size: 1.8rem;
 }
 
+.card-header-with-actions,
+.card-header .card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.card-header .card-title {
+  flex: 1;
+  min-width: 0;
+}
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.action-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: rgba(255,255,255,0.25);
+  color: white;
+  transition: background 0.2s;
+}
+.action-btn:hover {
+  background: rgba(255,255,255,0.4);
+}
+.action-btn.download-btn {
+  background: rgba(255,255,255,0.2);
+}
+
+.no-storage-notice {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  margin: 16px 0 24px;
+}
+
 .transcript-length {
   font-size: 0.9rem;
   opacity: 0.9;
@@ -487,6 +529,44 @@
   border-bottom: 1px solid #f0f0f0;
   margin-bottom: 15px;
   padding-bottom: 15px;
+}
+
+/* Structured lecture summary (headings + lists) */
+.summary-content-structured {
+  line-height: 1.75;
+  color: #333;
+}
+.summary-content-structured .summary-h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 1.5em 0 0.5em;
+  padding-bottom: 0.35em;
+  border-bottom: 2px solid #667eea;
+}
+.summary-content-structured .summary-h2:first-child {
+  margin-top: 0;
+}
+.summary-content-structured .summary-h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d2d44;
+  margin: 1em 0 0.4em;
+}
+.summary-content-structured .summary-list {
+  margin: 0.5em 0 1em 1.25em;
+  padding-left: 1.25em;
+}
+.summary-content-structured .summary-list-item {
+  margin: 0.35em 0;
+  line-height: 1.6;
+}
+.summary-content-structured .summary-paragraph {
+  margin: 0.5em 0;
+  padding: 0;
+}
+.summary-content-structured .summary-spacer {
+  height: 0.5em;
 }
 
 /* Transcript Content */

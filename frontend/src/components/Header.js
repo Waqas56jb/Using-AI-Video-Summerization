@@ -5,9 +5,9 @@ export function Header() {
     <header className="header">
       <h1 className="title">
         <span className="title-icon">🎬</span>
-        Video Summarizer
+        Lecture Transcribe & Summarize
       </h1>
-      <p className="subtitle">Transform any video into a concise summary</p>
+      <p className="subtitle">Upload a video → get transcript + summary (English)</p>
     </header>
   );
 }

@@ -4,23 +4,12 @@
  */
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'https://video-sumarizer.vercel.app';
+const API_BASE = process.env.REACT_APP_API_URL ?? (process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : '');
 
+const HEALTH_PATH = API_BASE ? '/' : '/api';
 export const api = {
   checkHealth() {
-    return axios.get(API_BASE + '/', { timeout: 8000 });
-  },
-
-  createSummarizeJob(url) {
-    const trimmed = typeof url === 'string' ? url.trim() : '';
-    return axios.post(
-      API_BASE + '/api/summarize',
-      { url: trimmed },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 60000
-      }
-    );
+    return axios.get(API_BASE + HEALTH_PATH, { timeout: 8000 });
   },
 
   createUploadJob(formData) {

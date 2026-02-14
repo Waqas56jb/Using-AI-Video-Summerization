@@ -1,5 +1,4 @@
 export { Header } from './Header';
-export { ModeToggle } from './ModeToggle';
 export { InputSection } from './InputSection';
 export { LoadingSection } from './LoadingSection';
 export { ErrorBox } from './ErrorBox';
