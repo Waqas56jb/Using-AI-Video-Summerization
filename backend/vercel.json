@@ -8,8 +8,8 @@
     { "source": "/", "destination": "/api" }
   ],
   "functions": {
-    "api/index.js": { "maxDuration": 60 },
-    "api/upload.js": { "maxDuration": 60 },
-    "api/[[...path]].js": { "maxDuration": 60 }
+    "api/index.js": { "maxDuration": 300 },
+    "api/upload.js": { "maxDuration": 300 },
+    "api/[[...path]].js": { "maxDuration": 300 }
   }
 }

@@ -12,12 +12,16 @@ import { api } from '../services/api';
 
 function getErrorMessage(err) {
   const errorData = err.response?.data;
+  const status = err.response?.status;
   let msg = errorData?.error || err.message || 'An error occurred';
   if (errorData?.code === 'FILE_TOO_LARGE') msg = 'File too large. Maximum 500MB.';
   else if (errorData?.code === 'MISSING_FILE') msg = 'Please select a video file.';
   else if (errorData?.code === 'VIDEO_NOT_SUPPORTED') msg = errorData?.error || 'On this deployment only audio files are supported (mp3, m4a, wav). For video, use a local backend or deploy to Render.';
+  else if (status === 504) msg = 'Request timed out. Try a shorter audio file (e.g. under 2–3 minutes).';
   else if (!err.response) {
-    msg = `Cannot reach the backend. Start it with: cd backend && node index.js (http://localhost:5000).\n\n${err.message || 'Network error'}`;
+    msg = process.env.NODE_ENV === 'development'
+      ? `Cannot reach the backend. Start it with: cd backend && node index.js (http://localhost:5000). ${err.message || 'Network error'}`
+      : `Cannot reach the backend. Check that the API URL is set and the backend is running. ${err.message || 'Network error'}`;
   }
   return msg;
 }
