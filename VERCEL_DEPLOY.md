@@ -8,7 +8,7 @@ Deploy **backend** and **frontend** as two separate Vercel projects. Use **Root 
 
 1. In Vercel: **New Project** → Import the same Git repo.
 2. **Root Directory:** set to **`backend`** (only the backend folder).
-3. **Output Directory:** In **Project Settings → General**, find **Output Directory**. Leave it **empty** (delete any value like `public`). The backend is API-only; no static output.
+3. **Output Directory:** Use the default from `vercel.json` (build creates `public` with an entrypoint). Do not set a different value in the dashboard unless the build fails; then try setting it to **`public`**.
 4. **Environment Variables** (same as your current `backend/.env`):
    - `OPENAI_API_KEY` = your OpenAI API key
    - Optionally: `PORT`, `REDIS_HOST`, `REDIS_PORT` (not required on Vercel)
