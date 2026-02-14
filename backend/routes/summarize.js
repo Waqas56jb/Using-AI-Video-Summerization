@@ -26,18 +26,8 @@ const storage = process.env.VERCEL
       }
     });
 
-const maxFileSize = process.env.VERCEL ? 25 * 1024 * 1024 : 500 * 1024 * 1024; // 25MB on Vercel to avoid timeout
-const upload = multer({
-  storage,
-  limits: { fileSize: maxFileSize }
-});
-
-const AUDIO_EXT = new Set(['.mp3', '.m4a', '.wav', '.webm', '.ogg', '.opus', '.flac']);
-const isAudioFile = (file) => {
-  const ext = path.extname((file.originalname || '').toLowerCase());
-  const mime = (file.mimetype || '').toLowerCase();
-  return AUDIO_EXT.has(ext) || mime.startsWith('audio/');
-};
+const maxFileSize = 500 * 1024 * 1024; // 500MB – same limit for Vercel and local
+const upload = multer({ storage, limits: { fileSize: maxFileSize } });
 
 router.post('/upload', upload.single('video'), async (req, res) => {
   let tmpPath = null;
@@ -48,12 +38,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
     const fileName = req.file.originalname;
 
     if (process.env.VERCEL) {
-      if (!isAudioFile(req.file)) {
-        return res.status(400).json({
-          error: 'On Vercel only audio files are supported (mp3, m4a, wav). Video needs the backend run locally.',
-          code: 'VIDEO_NOT_SUPPORTED'
-        });
-      }
+      // Accept both video and audio – Whisper API supports mp4, mp3, m4a, wav, webm, etc.
       // memoryStorage: write buffer to /tmp so transcribe can read the file
       const ext = path.extname(fileName) || '.mp3';
       tmpPath = path.join(uploadsDir, `audio-${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`);
@@ -98,10 +83,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
       try { fs.unlinkSync(tmpPath); } catch (_) {}
     }
     if (error.code === 'LIMIT_FILE_SIZE') {
-      const msg = process.env.VERCEL
-        ? 'File too large. On this server use audio under 25MB (about 2–3 minutes).'
-        : 'File too large. Maximum 500MB.';
-      return res.status(400).json({ error: msg, code: 'FILE_TOO_LARGE' });
+      return res.status(400).json({ error: 'File too large. Maximum 500MB.', code: 'FILE_TOO_LARGE' });
     }
     console.error('Error creating job:', error.message);
     res.status(500).json({ error: error.message, code: 'JOB_CREATION_ERROR' });

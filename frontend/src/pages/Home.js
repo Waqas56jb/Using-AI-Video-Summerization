@@ -19,7 +19,7 @@ function getErrorMessage(err) {
   else if (errorData?.code === 'MISSING_FILE') msg = 'Please select a video file.';
   else if (errorData?.code === 'TRANSCRIPTION_ERROR') msg = errorData?.error || 'Transcription or summarization failed. Try a shorter file or check the API key.';
   else if (errorData?.code === 'VIDEO_NOT_SUPPORTED') msg = errorData?.error || 'On this deployment only audio files are supported (mp3, m4a, wav). For video, use a local backend or deploy to Render.';
-  else if (status === 504 || isTimeout) msg = 'Request timed out. Try a shorter audio file (under 1–2 minutes on this server).';
+  else if (status === 504 || isTimeout) msg = 'Request timed out. Very long files may time out on this server; try a shorter clip or run the backend locally for large videos.';
   else if (!err.response) {
     msg = process.env.NODE_ENV === 'development'
       ? `Cannot reach the backend. Start it with: cd backend && node index.js (http://localhost:5000). ${err.message || 'Network error'}`
